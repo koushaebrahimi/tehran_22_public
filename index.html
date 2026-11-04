@@ -628,6 +628,7 @@ function populateProjectForm(p){
   ['pName','pCompany','pManager','pStaff','pDesc','pAddress','pStart','pEnd','pCost','pBudget','pSaplingsPlanted','pSaplingsMaintained','pAreaM2'].forEach(id => { const el = document.getElementById(id); if (el) el.disabled = locked; });
   const statusInput = document.getElementById('pStatus'); if (statusInput) statusInput.style.display = locked ? 'none' : '';
   const delBtn = document.getElementById('btnDeleteProject'); if (delBtn) delBtn.style.display = locked ? 'none' : '';
+  const backBtn = document.getElementById('btnBack'); if (backBtn) backBtn.style.display = '';
   const addExtra = document.getElementById('btnAddExtra'); if (addExtra) addExtra.style.display = locked ? 'none' : '';
   const addPhoto = document.getElementById('btnAddPhoto'); if (addPhoto) addPhoto.style.display = locked ? 'none' : '';
   document.querySelectorAll('.extra-row input').forEach(el => el.disabled = locked);
@@ -1105,7 +1106,7 @@ function bindEvents(){
   });
 
   mapbox().addEventListener('click', e => {
-    if (!canEdit()) { if (selectedProjectId) showOverview(); return; }
+    if (!canEdit()) { return; }
     if (e.target.closest('.pin-wrap')) return;
     if (addMode){
       const r = mapbox().getBoundingClientRect();
