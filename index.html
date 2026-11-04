@@ -1,0 +1,1205 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>نقشه پروژه‌های هلدینگ — گام ۳</title>
+<style>
+@font-face{font-family:'Vazirmatn';src:url('data:font/woff2;base64,') format('woff2');font-weight:100 900;font-display:swap;}
+
+:root{--bg:#f3f5f8;--panel:#fff;--line:#dfe4ea;--ink:#1b2430;--muted:#6b7785;--accent:#2563eb;--ok:#0f7a55;--warn:#b45309;--danger:#e11d48;--radius:12px}
+*{box-sizing:border-box} html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Vazirmatn',Tahoma,'Segoe UI',sans-serif;font-size:14px;line-height:1.7;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+
+/* HEADER */
+header{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line)}
+.brand{font-weight:700;font-size:15px;margin-inline-end:auto;display:flex;align-items:center;gap:8px}
+.brand small{font-weight:400;color:var(--muted);font-size:12px}
+.dot-dirty{width:8px;height:8px;border-radius:50%;background:#d1d5db;display:inline-block}
+.dot-dirty.on{background:var(--warn)}
+.btn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:6px 12px;cursor:pointer;transition:.15s;white-space:nowrap}
+.btn:hover{border-color:#c3ccd6;background:#fafbfc}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn.ghost{background:transparent}
+.btn.danger{color:var(--danger);border-color:#fecdd3}
+.btn.danger:hover{background:#fff1f2;border-color:#fda4af}
+.sep{width:1px;height:22px;background:var(--line)}
+#addCompanySelect,#reportCompany{padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:13px}
+
+/* LAYOUT */
+main{display:grid;grid-template-columns:330px 1fr;height:calc(100vh - 53px)}
+main.detail{grid-template-columns:400px 1fr}
+aside{background:var(--panel);border-inline-start:1px solid var(--line);overflow-y:auto;padding:14px}
+#viewProject[hidden],#viewOverview[hidden]{display:none}
+.sec{margin-bottom:18px}
+.sec h3{margin:0 0 8px;font-size:12.5px;font-weight:700;color:var(--muted);letter-spacing:.2px}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+.field label{font-size:12px;color:var(--muted)}
+.field input,.field select,.field textarea{width:100%;padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.field textarea{resize:vertical;min-height:48px;line-height:1.6}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;background:#e5e7eb;border-radius:3px;outline:none;padding:0;margin:6px 0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid #fff}
+
+/* COMPANIES */
+.co{display:grid;grid-template-columns:18px 26px 1fr auto 22px;align-items:center;gap:6px;padding:4px 0}
+.co-vis{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;margin:0}
+.co input[type=color]{width:26px;height:26px;padding:0;border:1px solid var(--line);border-radius:7px;background:none;cursor:pointer}
+.co input[type=color]::-webkit-color-swatch-wrapper{padding:2px}
+.co input[type=color]::-webkit-color-swatch{border:none;border-radius:5px}
+.co-name{border:1px solid transparent;background:transparent;border-radius:7px;padding:4px 7px;width:100%}
+.co-name:hover{border-color:var(--line)}
+.co-name:focus{outline:none;border-color:var(--accent);background:#fff}
+.co-count{font-size:12px;color:var(--muted);background:var(--bg);border-radius:6px;padding:0 7px}
+.co-del{border:none;background:none;color:#c0c8d0;cursor:pointer;font-size:17px;line-height:1;border-radius:6px;padding:0 2px}
+.co-del:hover{color:var(--danger);background:#fff1f2}
+
+/* SUMMARY */
+table.sum{width:100%;border-collapse:collapse;font-size:13px}
+table.sum td{padding:5px 4px;border-bottom:1px dashed var(--line)}
+table.sum tr:last-child td{border-bottom:none}
+table.sum td:last-child{text-align:end;font-weight:600;font-variant-numeric:tabular-nums}
+table.sum.co-table th{font-weight:600;font-size:11.5px;color:var(--muted);padding:4px;text-align:center}
+table.sum.co-table th:first-child{text-align:start}
+table.sum.co-table td{text-align:center;font-size:12.5px}
+table.sum.co-table td:first-child{text-align:start;font-weight:400}
+.co-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-inline-end:6px;vertical-align:middle}
+
+/* MAP */
+.mapwrap{padding:16px;overflow:auto}
+.mapbox{position:relative;background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 1px 3px rgba(16,24,40,.05);overflow:hidden}
+.mapbox img{display:block;width:100%;height:auto;user-select:none;-webkit-user-drag:none}
+.mapbox.empty{aspect-ratio:16/10;display:grid;place-items:center;background:repeating-linear-gradient(0deg,transparent 0 39px,rgba(0,0,0,.045) 39px 40px),repeating-linear-gradient(90deg,transparent 0 39px,rgba(0,0,0,.045) 39px 40px),#fcfdfe}
+.mapbox.add-mode{cursor:crosshair}
+.ph{text-align:center;color:var(--muted);padding:24px}
+.ph b{display:block;color:var(--ink);margin-bottom:4px}
+
+/* edges — نسخهٔ درشت‌تر */
+.edges-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible}
+.edge{stroke-width:2.5;opacity:.55;stroke-dasharray:4 6;animation:edge-flow 2s linear infinite;fill:none}
+.edge.dim{opacity:.12;animation-play-state:paused}
+.edge.hot{stroke-width:4.5;opacity:1;stroke-dasharray:none;animation:none}
+@keyframes edge-flow{to{stroke-dashoffset:-20}}
+
+/* pins */
+.pin-wrap{position:absolute;transform:translate(-50%,-50%);z-index:2;cursor:grab}
+.pin-wrap.selected{z-index:3}
+.pin-wrap.dragging{z-index:5;cursor:grabbing}
+.pin-float{animation:pin-float 4s ease-in-out infinite}
+@keyframes pin-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+.pin{width:14px;height:14px;border-radius:50%;border:2px solid #fff;background:var(--c,#888);box-shadow:0 1px 5px rgba(0,0,0,.4);transition:transform .15s,box-shadow .15s;position:relative}
+.pin::before{content:'';position:absolute;inset:-8px;border-radius:50%}
+.pin-wrap:hover .pin{transform:scale(1.4);box-shadow:0 2px 8px rgba(0,0,0,.5),0 0 12px var(--c,#888)}
+.pin-wrap:hover .pin-float{animation-play-state:paused}
+.pin-wrap.selected .pin{transform:scale(1.5);box-shadow:0 2px 8px rgba(0,0,0,.5),0 0 16px var(--c,#888)}
+.pin-wrap.dragging .pin{transform:scale(1.25);animation:none}
+.pin-wrap[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:rgba(27,36,48,.94);color:#fff;padding:4px 10px;border-radius:8px;white-space:nowrap;font-size:12px;margin-bottom:8px;pointer-events:none;z-index:10;box-shadow:0 4px 12px rgba(0,0,0,.18)}
+
+/* extra fields */
+.extra-row{display:grid;grid-template-columns:1fr 1fr 24px;gap:6px;margin-bottom:6px}
+.extra-row input{width:100%;padding:4px 8px;border:1px solid var(--line);border-radius:6px;font-size:13px;background:#fff}
+.extra-row input:focus{outline:none;border-color:var(--accent)}
+.extra-row button{border:none;background:none;color:#c0c8d0;cursor:pointer;font-size:16px;line-height:1;border-radius:6px}
+.extra-row button:hover{color:var(--danger);background:#fff1f2}
+
+/* toast */
+#toasts{position:fixed;inset-block-end:16px;inset-inline-start:16px;display:flex;flex-direction:column;gap:8px;z-index:99}
+.toast{padding:8px 14px;border-radius:10px;background:#1b2430;color:#fff;font-size:13px;box-shadow:0 6px 18px rgba(0,0,0,.18);animation:tin .18s ease-out}
+.toast.ok{background:var(--ok)} .toast.warn{background:var(--warn)}
+@keyframes tin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.hint{font-size:11.5px;color:var(--muted);line-height:1.65;margin-top:6px}
+.mode-badge{display:inline-block;padding:1px 8px;border-radius:8px;font-size:11px;font-weight:600}
+.mode-badge.showcase{background:#e0f2e9;color:#0f7a55}
+.mode-badge.internal{background:#e5edff;color:#2563eb}
+.photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px}
+.photo-item{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:#f3f5f8}
+.photo-item img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}
+.photo-del{position:absolute;top:4px;inset-inline-end:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;border:none;cursor:pointer;font-size:14px;line-height:1;display:grid;place-items:center;padding:0}
+.photo-del:hover{background:var(--danger)}
+#lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;display:grid;place-items:center;cursor:zoom-out}
+#lightbox[hidden]{display:none}
+#lightbox img{max-width:90vw;max-height:90vh;border-radius:8px}
+body.hide-internal .internal-only{display:none !important}
+body.hide-showcase .showcase-only{display:none !important}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span class="dot-dirty" id="dirtyDot"></span>
+    نقشهٔ پروژه‌های هلدینگ
+    <small id="modeBadge">—</small>
+  </div>
+  <button class="btn" id="btnOpen">بارگذاری داده</button>
+  <button class="btn primary" id="btnSave">ذخیره</button>
+  <button class="btn" id="btnExport">خروجی JSON</button>
+  <span class="sep"></span>
+  <button class="btn" id="btnMap">نقشه</button>
+  <button class="btn ghost" id="btnMapClear">حذف نقشه</button>
+  <span class="sep"></span>
+  <button class="btn" id="btnAdd">＋ افزودن پروژه</button>
+  <select id="addCompanySelect" hidden></select>
+  <span class="sep"></span>
+  <button class="btn" id="btnPrint" title="چاپ / PDF">چاپ گزارش</button>
+  <select id="reportCompany" title="انتخاب شرکت برای گزارش متنی"></select>
+  <button class="btn" id="btnTxt">گزارش متنی</button>
+  <button class="btn" id="btnCsv">خروجی CSV</button>
+  <button class="btn ghost" id="btnUnlock" style="display:none">🔒 حالت ویرایش</button>
+  <button class="btn showcase-only" id="btnIg">تصویر اینستاگرام</button>
+  <button class="btn showcase-only" id="btnLi">تصویر لینکدین</button>
+  <input type="file" id="fileData" accept=".json,application/json" hidden>
+  <input type="file" id="fileMap" accept="image/*" hidden>
+</header>
+
+<main>
+  <aside>
+    <div id="viewOverview">
+      <div class="sec">
+        <h3>هلدینگ</h3>
+        <div class="field"><label for="holdName">نام هلدینگ</label><input id="holdName" type="text" placeholder="نام هلدینگ"></div>
+        <div class="field"><label for="holdManager">مدیر هلدینگ</label><input id="holdManager" type="text" placeholder="نام و نام خانوادگی"></div>
+        <div class="field internal-only"><label for="currency">واحد پول</label>
+          <select id="currency"><option value="toman">تومان</option><option value="rial">ریال</option></select></div>
+      </div>
+      <div class="sec internal-only">
+        <h3>شرکت‌های زیرمجموعه</h3>
+        <div id="companies"></div>
+        <button class="btn" id="addCompany" style="margin-top:8px;width:100%">افزودن شرکت</button>
+      </div>
+      <div class="sec"><h3>خلاصه</h3><table class="sum" id="summary"></table>
+        <div class="showcase-only" style="margin-top:10px;display:flex;align-items:center;gap:8px">
+          <label style="font-size:12px;color:var(--muted)">رنگ گراف</label>
+          <input type="color" id="showcaseColor" style="width:36px;height:28px;padding:0;border:1px solid var(--line);border-radius:6px;cursor:pointer;background:none">
+        </div>
+      </div>
+      <div class="sec internal-only"><h3>جزئیات شرکت‌ها</h3><table class="sum co-table" id="summaryCo"></table></div>
+      <p class="hint">
+        افزودن: «＋ افزودن پروژه» → روی نقشه کلیک.<br>
+        جابه‌جایی: کشیدن. حذف: راست‌کلیک. ویرایش: کلیک.
+      </p>
+    </div>
+
+    <div id="viewProject" hidden>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--line)">
+        <button class="btn" id="btnBack">‹ بازگشت</button>
+        <button class="btn danger" id="btnDeleteProject" style="margin-inline-start:auto">حذف پروژه</button>
+      </div>
+      <div class="field"><label for="pName">نام پروژه</label><input id="pName" type="text"></div>
+      <div class="field internal-only"><label for="pCompany">شرکت</label><select id="pCompany"></select></div>
+      <div class="field"><label for="pManager">مدیر پروژه</label><input id="pManager" type="text" placeholder="نام و نام خانوادگی"></div>
+      <div class="field"><label for="pStaff">سایر مسئولان (با ویرگول)</label><input id="pStaff" type="text" placeholder="نام ۱، نام ۲"></div>
+      <div class="field"><label for="pStatus">وضعیت پیشرفت: <b id="pStatusVal">۰٪</b></label><input id="pStatus" type="range" min="0" max="100" step="1"></div>
+      <div class="field"><label for="pDesc">توضیحات</label><textarea id="pDesc" rows="2"></textarea></div>
+      <div class="field"><label for="pAddress">آدرس</label><input id="pAddress" type="text"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="field"><label for="pStart">تاریخ شروع</label><input id="pStart" type="text" placeholder="۱۴۰۳/۰۵/۱۲"></div>
+        <div class="field"><label for="pEnd">تاریخ پایان</label><input id="pEnd" type="text" placeholder="۱۴۰۴/۰۲/۳۰"></div>
+        <div class="field internal-only"><label for="pCost">هزینه کل</label><input id="pCost" type="number" min="0" step="1000"></div>
+        <div class="field internal-only"><label for="pBudget">بودجه</label><input id="pBudget" type="number" min="0" step="1000"></div>
+      </div>
+      <div class="showcase-only">
+        <div class="field"><label for="pSaplingsPlanted">نهال کاشته‌شده</label><input id="pSaplingsPlanted" type="number" min="0" step="1"></div>
+        <div class="field"><label for="pSaplingsMaintained">نهال نگهداری‌شده</label><input id="pSaplingsMaintained" type="number" min="0" step="1"></div>
+        <div class="field"><label for="pAreaM2">مساحت (متر مربع)</label><input id="pAreaM2" type="number" min="0" step="1"><small id="pAreaFormatted" style="font-size:11.5px;color:var(--muted)"></small></div>
+        <div class="field"><label>تصاویر <span id="photoCount" style="color:var(--muted);font-weight:400"></span></label><div id="photoGrid" class="photo-grid"></div><input type="file" id="photoInput" accept="image/*" multiple hidden><button class="btn" id="btnAddPhoto" type="button" style="width:100%">+ افزودن عکس</button></div>
+      </div>
+      <div class="field" style="margin-top:8px">
+        <label>فیلدهای اضافی</label>
+        <div id="pExtra"></div>
+        <button class="btn" id="btnAddExtra" type="button" style="width:100%;margin-top:4px">+ افزودن فیلد</button>
+      </div>
+    </div>
+  </aside>
+
+  <section class="mapwrap"><div class="mapbox empty" id="mapbox"></div></section>
+</main>
+
+<div id="toasts"></div>
+<div id="lightbox" hidden><img id="lightboxImg" alt=""></div>
+
+<script>
+/* ============================================================
+   ابزارها
+   ============================================================ */
+const $ = s => document.querySelector(s);
+const mapbox = () => document.getElementById('mapbox');
+const faNum = n => Number(n||0).toLocaleString('fa-IR');
+const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
+const num = (v,d=0) => { const n = Number(v); return Number.isFinite(n) ? n : d; };
+const uid = p => p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const PALETTE = ['#e6194b','#3cb44b','#4363d8','#f58231','#911eb4','#0f8b8d','#c9a227','#607d8b'];
+
+function stableDelay(id){
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
+  return -((Math.abs(h) % 40) / 10);
+}
+function isShowcase(){ return DATA.settings.mode === 'showcase'; }
+function formatArea(m2){
+  const n = Number(m2) || 0;
+  if (n >= 10000){
+    const ha = n / 10000;
+    return faNum(Math.round(ha * 100) / 100) + ' هکتار';
+  }
+  return faNum(Math.round(n)) + ' متر مربع';
+}
+function todayLabel(){
+  try { return new Date().toLocaleDateString('fa-IR', {year:'numeric', month:'2-digit', day:'2-digit'}); }
+  catch { return new Date().toISOString().slice(0,10); }
+}
+function moneyFmt(v){
+  const cur = DATA.settings.currency === 'rial' ? 'ریال' : 'تومان';
+  const mul = DATA.settings.currency === 'rial' ? 10 : 1;
+  return faNum(Math.round(num(v) * mul)) + ' ' + cur;
+}
+
+/* ============================================================
+   مدل داده
+   ============================================================ */
+function defaultData(){
+  return {
+    meta:     { version: 2, title: 'هلدینگ', updatedAt: new Date().toISOString() },
+    settings: { currency: 'toman', mapImage: null, mapName: null, mode: 'internal', readonly: false, editPassword: 'tehran22' },
+    holding:  { name: 'هلدینگ', manager: '' },
+    companies: Array.from({length:7}, (_,i) => ({ id:'c'+(i+1), name:'شرکت '+faNum(i+1), manager:'', color:PALETTE[i%PALETTE.length] })),
+    projects: []
+  };
+}
+function normalize(input){
+  const d = (input && typeof input === 'object') ? input : {};
+  const out = defaultData();
+  out.meta = Object.assign(out.meta, d.meta || {});
+  out.settings = Object.assign(out.settings, d.settings || {});
+  if (out.settings.mode !== 'showcase' && out.settings.mode !== 'internal') out.settings.mode = 'internal';
+  out.settings.readonly = !!out.settings.readonly;
+  if (typeof out.settings.editPassword !== 'string' || !out.settings.editPassword) out.settings.editPassword = 'tehran22';
+  if (d.holding) out.holding = Object.assign(out.holding, d.holding);
+  if (Array.isArray(d.companies) && d.companies.length){
+    out.companies = d.companies.map((c,i) => ({
+      id: c.id || uid('c'),
+      name: c.name || ('شرکت ' + faNum(i+1)),
+      manager: c.manager || '',
+      color: /^#[0-9a-f]{6}$/i.test(c.color || '') ? c.color : PALETTE[i % PALETTE.length]
+    }));
+  }
+  const ids = new Set(out.companies.map(c => c.id));
+  out.projects = (Array.isArray(d.projects) ? d.projects : []).map(p => ({
+    id: p.id || uid('p'),
+    name: p.name || 'پروژهٔ بی‌نام',
+    companyId: (out.settings.mode === 'showcase' && out.companies[0]) ? out.companies[0].id : (ids.has(p.companyId) ? p.companyId : out.companies[0].id),
+    manager: p.manager || '',
+    staff: Array.isArray(p.staff) ? p.staff.filter(Boolean).map(String) : [],
+    status: clamp(num(p.status,0), 0, 100),
+    description: p.description || '',
+    address: p.address || '',
+    startDate: p.startDate || '',
+    endDate: p.endDate || '',
+    totalCost: num(p.totalCost,0),
+    budget: num(p.budget,0),
+    x: clamp(num(p.x,0.5),0,1),
+    y: clamp(num(p.y,0.5),0,1),
+    extra: Array.isArray(p.extra) ? p.extra.map(e => ({k:String(e.k??''), v:String(e.v??'')})) : [],
+    saplingsPlanted: num(p.saplingsPlanted, 0),
+    saplingsMaintained: num(p.saplingsMaintained, 0),
+    areaM2: num(p.areaM2, 0),
+    photos: Array.isArray(p.photos) ? p.photos.filter(Boolean).map(String).slice(0,4) : []
+  }));
+  return out;
+}
+
+/* ============================================================
+   وضعیت
+   ============================================================ */
+let DATA = defaultData();
+let fileHandle = null;
+let dirty = false;
+let selectedProjectId = null;
+let addMode = false;
+let editUnlocked = false;
+function canEdit(){ return !DATA.settings.readonly || editUnlocked; }
+function resetUnlock(){ editUnlocked = !DATA.settings.readonly; }
+const hiddenCompanies = new Set();
+let svgEl = null;
+
+function markDirty(){ if (!canEdit()) return; dirty = true; $('#dirtyDot').classList.add('on'); }
+function setClean(){ dirty = false; $('#dirtyDot').classList.remove('on'); }
+function isCompanyVisible(id){ return !hiddenCompanies.has(id); }
+
+/* ============================================================
+   رندر
+   ============================================================ */
+function render(){
+  renderHolding();
+  renderCompanies();
+  renderSummary();
+  renderMap();
+  renderReportSelect();
+  if (selectedProjectId){
+    const p = DATA.projects.find(x => x.id === selectedProjectId);
+    if (p) populateProjectForm(p); else showOverview();
+  }
+}
+function renderHolding(){
+  $('#holdName').value = DATA.holding.name || '';
+  $('#holdManager').value = DATA.holding.manager || '';
+  $('#currency').value = DATA.settings.currency || 'toman';
+  const locked = !canEdit();
+  const badge = $('#modeBadge');
+  if (badge){
+    const lbl = isShowcase()
+      ? (DATA.settings.readonly ? (editUnlocked ? 'نمایش عمومی — ویرایش باز' : 'نمایش عمومی — فقط خواندنی') : 'نمایش عمومی')
+      : 'نمایش داخلی';
+    badge.textContent = lbl;
+    badge.className = 'mode-badge ' + (isShowcase() ? 'showcase' : 'internal');
+  }
+  ['btnSave','btnOpen','btnExport','btnMap','btnMapClear','btnAdd'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.style.display = locked ? 'none' : '';
+  });
+  const selAdd = document.getElementById('addCompanySelect'); if (selAdd) selAdd.style.display = locked ? 'none' : '';
+  const addCo = document.getElementById('addCompany'); if (addCo && locked) addCo.style.display = 'none';
+  const dirtyDot = document.getElementById('dirtyDot'); if (dirtyDot) dirtyDot.style.display = locked ? 'none' : '';
+  const unlockBtn = document.getElementById('btnUnlock');
+  if (unlockBtn){
+    if (!DATA.settings.readonly) unlockBtn.style.display = 'none';
+    else { unlockBtn.style.display = ''; unlockBtn.textContent = locked ? '🔒 حالت ویرایش' : '🔓 خروج از ویرایش'; }
+  }
+  document.body.classList.toggle('hide-internal', isShowcase());
+  document.body.classList.toggle('hide-showcase', !isShowcase());
+}
+function renderCompanies(){
+  const box = $('#companies'); box.innerHTML = '';
+  const list = isShowcase() ? DATA.companies.slice(0,1) : DATA.companies;
+  list.forEach(c => {
+    const row = document.createElement('div'); row.className = 'co';
+    const vis = document.createElement('input');
+    vis.type='checkbox'; vis.className='co-vis'; vis.checked = isCompanyVisible(c.id); vis.title='نمایش روی نقشه';
+    vis.addEventListener('change', () => {
+      if (vis.checked) hiddenCompanies.delete(c.id); else hiddenCompanies.add(c.id);
+      renderPins(); renderEdges();
+    });
+    const color = document.createElement('input');
+    color.type='color'; color.value=c.color;
+    color.addEventListener('input', () => { c.color=color.value; markDirty(); renderPins(); renderEdges(); });
+    const name = document.createElement('input');
+    name.type='text'; name.className='co-name'; name.value=c.name;
+    name.addEventListener('input', () => { c.name=name.value; markDirty(); renderReportSelect(); });
+    const count = document.createElement('span'); count.className='co-count';
+    count.textContent = faNum(DATA.projects.filter(p=>p.companyId===c.id).length);
+    const del = document.createElement('button'); del.className='co-del'; del.textContent='×';
+    del.addEventListener('click', () => removeCompany(c));
+    if (isShowcase()){ row.append(color, name, count); }
+    else { row.append(vis, color, name, count, del); }
+    box.append(row);
+  });
+  const addBtn = $('#addCompany');
+  if (addBtn) addBtn.style.display = isShowcase() ? 'none' : '';
+}
+function renderSummary(){
+  const list = DATA.projects;
+  const avg = list.length ? Math.round(list.reduce((s,p)=>s+p.status,0)/list.length) : 0;
+  const sum = k => list.reduce((s,p)=>s+num(p[k]),0);
+  let rows;
+  if (isShowcase()){
+    rows = [
+      ['تعداد پروژه‌ها', faNum(list.length)],
+      ['میانگین پیشرفت', faNum(avg)+'٪'],
+      ['مجموع نهال کاشته‌شده', faNum(sum('saplingsPlanted'))],
+      ['مجموع نهال نگهداری‌شده', faNum(sum('saplingsMaintained'))],
+      ['مجموع مساحت', formatArea(sum('areaM2'))]
+    ];
+  } else {
+    rows = [
+      ['تعداد شرکت‌ها', faNum(DATA.companies.length)],
+      ['تعداد پروژه‌ها', faNum(list.length)],
+      ['میانگین پیشرفت', faNum(avg)+'٪'],
+      ['مجموع بودجه', moneyFmt(sum('budget'))],
+      ['مجموع هزینه', moneyFmt(sum('totalCost'))]
+    ];
+  }
+  $('#summary').innerHTML = rows.map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('');
+  const sc = $('#showcaseColor');
+  if (sc && DATA.companies[0]) sc.value = DATA.companies[0].color;
+  const coRows = DATA.companies.map(c => {
+    const ps = list.filter(p=>p.companyId===c.id);
+    const a = ps.length ? Math.round(ps.reduce((s,p)=>s+p.status,0)/ps.length) : 0;
+    return `<tr><td><span class="co-dot" style="background:${esc(c.color)}"></span>${esc(c.name)}</td><td>${faNum(ps.length)}</td><td>${faNum(a)}٪</td></tr>`;
+  }).join('');
+  $('#summaryCo').innerHTML = `<tr><th>شرکت</th><th>#</th><th>پیشرفت</th></tr>${coRows}`;
+}
+function renderReportSelect(){
+  const sel = $('#reportCompany');
+  const current = sel.value;
+  sel.innerHTML = `<option value="">همه شرکتها</option>` +
+    DATA.companies.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+  if (current) sel.value = current;
+}
+
+/* ============================================================
+   نقشه
+   ============================================================ */
+function renderMap(){
+  const box = mapbox();
+  box.innerHTML = '';
+  box.classList.toggle('empty', !DATA.settings.mapImage);
+  if (DATA.settings.mapImage){
+    const img = document.createElement('img');
+    img.src = DATA.settings.mapImage; img.alt='نقشه'; img.draggable=false;
+    box.append(img);
+  } else {
+    const ph = document.createElement('div'); ph.className='ph';
+    ph.innerHTML = '<b>نقشه‌ای بارگذاری نشده</b>از دکمهٔ «نقشه» استفاده کنید.';
+    box.append(ph);
+  }
+  svgEl = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svgEl.setAttribute('class','edges-svg');
+  svgEl.setAttribute('viewBox','0 0 1000 1000');
+  svgEl.setAttribute('preserveAspectRatio','none');
+  box.append(svgEl);
+  renderPins(); renderEdges();
+}
+function renderPins(){
+  const box = mapbox();
+  box.querySelectorAll('.pin-wrap').forEach(el => el.remove());
+  const showcaseColor = isShowcase() && DATA.companies[0] ? DATA.companies[0].color : null;
+  DATA.projects.forEach(p => {
+    if (!isCompanyVisible(p.companyId) && !isShowcase()) return;
+    const co = DATA.companies.find(c => c.id === p.companyId);
+    const color = showcaseColor || (co ? co.color : '#888');
+    const wrap = document.createElement('div');
+    wrap.className = 'pin-wrap' + (p.id === selectedProjectId ? ' selected' : '');
+    wrap.dataset.pid = p.id;
+    wrap.style.left = (p.x*100)+'%';
+    wrap.style.top  = (p.y*100)+'%';
+    wrap.style.setProperty('--c', color);
+    let tip = p.name;
+    if (isShowcase()){
+      if (p.saplingsPlanted) tip += ' — ' + faNum(p.saplingsPlanted) + ' نهال';
+      if (p.areaM2) tip += ' — ' + formatArea(p.areaM2);
+      tip += ' — ' + faNum(p.status) + '٪';
+    } else {
+      tip += (co?' — '+co.name:'') + ' — ' + faNum(p.status) + '٪';
+    }
+    wrap.dataset.tip = tip;
+    const fl = document.createElement('div');
+    fl.className = 'pin-float';
+    fl.style.animationDelay = stableDelay(p.id) + 's';
+    const pin = document.createElement('div'); pin.className = 'pin';
+    fl.append(pin); wrap.append(fl); box.append(wrap);
+    attachPinEvents(wrap, p);
+  });
+}
+function renderEdges(){
+  if (!svgEl) return;
+  const lines = [];
+  if (isShowcase()){
+    const ps = DATA.projects;
+    const color = DATA.companies[0] ? DATA.companies[0].color : '#888';
+    for (let i = 0; i < ps.length; i++)
+      for (let j = i+1; j < ps.length; j++){
+        const p1 = ps[i], p2 = ps[j];
+        const involvesSel = selectedProjectId && (p1.id === selectedProjectId || p2.id === selectedProjectId);
+        const anySel = selectedProjectId !== null;
+        const cls = involvesSel ? 'edge hot' : (anySel ? 'edge dim' : 'edge');
+        lines.push(`<line class="${cls}" x1="${p1.x*1000}" y1="${p1.y*1000}" x2="${p2.x*1000}" y2="${p2.y*1000}" stroke="${esc(color)}" vector-effect="non-scaling-stroke"/>`);
+      }
+  } else {
+    DATA.companies.forEach(co => {
+      if (!isCompanyVisible(co.id)) return;
+      const ps = DATA.projects.filter(p => p.companyId === co.id);
+      for (let i = 0; i < ps.length; i++)
+        for (let j = i+1; j < ps.length; j++){
+          const p1 = ps[i], p2 = ps[j];
+          const involvesSel = selectedProjectId && (p1.id === selectedProjectId || p2.id === selectedProjectId);
+          const anySel = selectedProjectId !== null;
+          const cls = involvesSel ? 'edge hot' : (anySel ? 'edge dim' : 'edge');
+          lines.push(`<line class="${cls}" x1="${p1.x*1000}" y1="${p1.y*1000}" x2="${p2.x*1000}" y2="${p2.y*1000}" stroke="${esc(co.color)}" vector-effect="non-scaling-stroke"/>`);
+        }
+    });
+  }
+  svgEl.innerHTML = lines.join('');
+}
+function attachPinEvents(wrap, p){
+  if (!canEdit()){
+    wrap.style.cursor = 'pointer';
+    wrap.addEventListener('click', () => selectProject(p.id));
+    return;
+  }
+  let sx=0, sy=0, moved=false;
+  wrap.addEventListener('mousedown', e => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    sx=e.clientX; sy=e.clientY; moved=false;
+    wrap.classList.add('dragging');
+    const onMove = ev => {
+      const dx = ev.clientX - sx, dy = ev.clientY - sy;
+      if (Math.abs(dx)>3 || Math.abs(dy)>3) moved = true;
+      const rect = mapbox().getBoundingClientRect();
+      p.x = clamp((ev.clientX-rect.left)/rect.width, 0, 1);
+      p.y = clamp((ev.clientY-rect.top)/rect.height, 0, 1);
+      wrap.style.left = (p.x*100)+'%';
+      wrap.style.top  = (p.y*100)+'%';
+      renderEdges();
+    };
+    const onUp = () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      wrap.classList.remove('dragging');
+      if (moved) markDirty(); else selectProject(p.id);
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+  wrap.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    if (confirm(`پروژه «${p.name}» حذف شود؟`)) deleteProject(p.id);
+  });
+}
+
+/* ============================================================
+   CRUD پروژه
+   ============================================================ */
+function createProject(x, y){
+  const companyId = isShowcase()
+    ? DATA.companies[0]?.id
+    : ($('#addCompanySelect').value || DATA.companies[0]?.id);
+  if (!companyId){ toast('ابتدا یک شرکت بسازید.', 'warn'); return; }
+  const project = {
+    id: uid('p'), name: 'پروژه جدید', companyId, manager:'', staff:[], status:0,
+    description:'', address:'', startDate:'', endDate:'', totalCost:0, budget:0, x, y, extra:[],
+    saplingsPlanted:0, saplingsMaintained:0, areaM2:0, photos:[]
+  };
+  DATA.projects.push(project);
+  markDirty();
+  renderPins(); renderEdges(); renderCompanies(); renderSummary();
+  toggleAddMode(false);
+  selectProject(project.id);
+}
+function deleteProject(id){
+  DATA.projects = DATA.projects.filter(x => x.id !== id);
+  if (selectedProjectId === id) showOverview();
+  markDirty();
+  renderPins(); renderEdges(); renderCompanies(); renderSummary();
+}
+function selectProject(id){
+  const p = DATA.projects.find(x => x.id === id);
+  if (!p) return;
+  selectedProjectId = id;
+  $('#viewOverview').hidden = true;
+  $('#viewProject').hidden = false;
+  document.querySelector('main').classList.add('detail');
+  populateProjectForm(p);
+  renderPins(); renderEdges();
+}
+function showOverview(){
+  selectedProjectId = null;
+  $('#viewProject').hidden = true;
+  $('#viewOverview').hidden = false;
+  document.querySelector('main').classList.remove('detail');
+  renderPins(); renderEdges();
+}
+function populateProjectForm(p){
+  $('#pName').value = p.name;
+  $('#pCompany').innerHTML = DATA.companies.map(c =>
+    `<option value="${esc(c.id)}"${c.id===p.companyId?' selected':''}>${esc(c.name)}</option>`).join('');
+  $('#pManager').value = p.manager;
+  $('#pStaff').value = p.staff.join('، ');
+  $('#pStatus').value = p.status;
+  $('#pStatusVal').textContent = faNum(p.status)+'٪';
+  $('#pDesc').value = p.description;
+  $('#pAddress').value = p.address;
+  $('#pStart').value = p.startDate;
+  $('#pEnd').value = p.endDate;
+  $('#pCost').value = p.totalCost;
+  $('#pBudget').value = p.budget;
+  $('#pSaplingsPlanted').value = p.saplingsPlanted || 0;
+  $('#pSaplingsMaintained').value = p.saplingsMaintained || 0;
+  $('#pAreaM2').value = p.areaM2 || 0;
+  $('#pAreaFormatted').textContent = p.areaM2 ? '≈ ' + formatArea(p.areaM2) : '';
+  renderPhotos(p);
+  renderExtra(p);
+  const locked = !canEdit();
+  ['pName','pCompany','pManager','pStaff','pDesc','pAddress','pStart','pEnd','pCost','pBudget','pSaplingsPlanted','pSaplingsMaintained','pAreaM2'].forEach(id => { const el = document.getElementById(id); if (el) el.disabled = locked; });
+  const statusInput = document.getElementById('pStatus'); if (statusInput) statusInput.style.display = locked ? 'none' : '';
+  const delBtn = document.getElementById('btnDeleteProject'); if (delBtn) delBtn.style.display = locked ? 'none' : '';
+  const addExtra = document.getElementById('btnAddExtra'); if (addExtra) addExtra.style.display = locked ? 'none' : '';
+  const addPhoto = document.getElementById('btnAddPhoto'); if (addPhoto) addPhoto.style.display = locked ? 'none' : '';
+  document.querySelectorAll('.extra-row input').forEach(el => el.disabled = locked);
+  document.querySelectorAll('.extra-row button').forEach(el => el.style.display = locked ? 'none' : '');
+  document.querySelectorAll('.photo-del').forEach(el => el.style.display = locked ? 'none' : '');
+}
+function renderExtra(p){
+  const box = $('#pExtra'); box.innerHTML = '';
+  p.extra.forEach((ef, i) => {
+    const row = document.createElement('div'); row.className='extra-row';
+    const k = document.createElement('input'); k.type='text'; k.placeholder='کلید'; k.value=ef.k;
+    k.addEventListener('input', () => { ef.k=k.value; markDirty(); });
+    const v = document.createElement('input'); v.type='text'; v.placeholder='مقدار'; v.value=ef.v;
+    v.addEventListener('input', () => { ef.v=v.value; markDirty(); });
+    const d = document.createElement('button'); d.type='button'; d.textContent='×';
+    d.addEventListener('click', () => { p.extra.splice(i,1); markDirty(); renderExtra(p); });
+    row.append(k, v, d); box.append(row);
+  });
+}
+
+/* ============================================================
+   حالت افزودن
+   ============================================================ */
+function toggleAddMode(force){
+  if (!canEdit()) return;
+  addMode = (force === undefined) ? !addMode : !!force;
+  const btn = $('#btnAdd'), sel = $('#addCompanySelect');
+  btn.classList.toggle('primary', addMode);
+  btn.textContent = addMode ? '× لغو افزودن' : '＋ افزودن پروژه';
+  sel.hidden = !addMode || isShowcase();
+  mapbox().classList.toggle('add-mode', addMode);
+  if (addMode){
+    if (!isShowcase()){
+      sel.innerHTML = DATA.companies.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+    }
+    if (selectedProjectId) showOverview();
+  }
+}
+
+/* ============================================================
+   شرکت‌ها
+   ============================================================ */
+function removeCompany(c){
+  const n = DATA.projects.filter(p => p.companyId === c.id).length;
+  if (n){ toast(`این شرکت ${faNum(n)} پروژه دارد؛ ابتدا پروژه‌ها را حذف/منتقل کنید.`, 'warn'); return; }
+  if (!confirm(`شرکت «${c.name}» حذف شود؟`)) return;
+  DATA.companies = DATA.companies.filter(x => x.id !== c.id);
+  hiddenCompanies.delete(c.id);
+  markDirty(); render();
+}
+
+/* ============================================================
+   بارگذاری / ذخیره
+   ============================================================ */
+async function openData(){
+  try{
+    if (window.showOpenFilePicker){
+      const [h] = await window.showOpenFilePicker({
+        multiple: false,
+        types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }]
+      });
+      const f = await h.getFile();
+      await applyImport(await f.text());
+      fileHandle = h;
+    } else { $('#fileData').click(); }
+  }catch(err){
+    if (err && err.name === 'AbortError') return;
+    $('#fileData').click();
+  }
+}
+async function applyImport(text){
+  let obj;
+  try { obj = JSON.parse(text); }
+  catch { toast('فایل JSON معتبر نیست.', 'warn'); return false; }
+  DATA = normalize(obj);
+  selectedProjectId = null;
+  hiddenCompanies.clear();
+  resetUnlock();
+  setClean(); render();
+  toast('داده بارگذاری شد.', 'ok');
+  return true;
+}
+async function saveData(){
+  DATA.meta.updatedAt = new Date().toISOString();
+  const text = JSON.stringify(DATA, null, 2);
+  if (window.showSaveFilePicker){
+    try{
+      if (!fileHandle){
+        fileHandle = await window.showSaveFilePicker({
+          suggestedName: 'data.json',
+          types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }]
+        });
+      }
+      const w = await fileHandle.createWritable();
+      await w.write(text); await w.close();
+      setClean(); toast('ذخیره شد ✓', 'ok'); return;
+    }catch(err){
+      if (err && err.name === 'AbortError') return;
+      fileHandle = null;
+    }
+  }
+  downloadFile(new Blob([text], {type:'application/json;charset=utf-8'}), 'data.json');
+  setClean(); toast('فایل data.json دانلود شد.', 'ok');
+}
+function downloadFile(blob, name){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/* ============================================================
+   گزارش‌ها
+   ============================================================ */
+function buildReportHTML(){
+  const totalBudget = DATA.projects.reduce((s,p)=>s+num(p.budget),0);
+  const totalCost   = DATA.projects.reduce((s,p)=>s+num(p.totalCost),0);
+  const avg = DATA.projects.length ? Math.round(DATA.projects.reduce((s,p)=>s+p.status,0)/DATA.projects.length) : 0;
+
+  const companyBlocks = DATA.companies.map(c => {
+    const ps = DATA.projects.filter(p => p.companyId === c.id);
+    if (!ps.length) return '';
+    const cavg = Math.round(ps.reduce((s,p)=>s+p.status,0)/ps.length);
+    return `
+      <section class="co">
+        <h2><span class="dot" style="background:${esc(c.color)}"></span>${esc(c.name)}
+          <small>مدیر: ${esc(c.manager || '—')}</small></h2>
+        <p class="metrics">${faNum(ps.length)} پروژه • میانگین پیشرفت ${faNum(cavg)}٪</p>
+        <table>
+          <thead><tr><th>#</th><th>پروژه</th><th>مدیر</th><th>مسئولان</th><th>پیشرفت</th><th>آدرس</th><th>بازه</th><th>هزینه</th><th>بودجه</th></tr></thead>
+          <tbody>
+            ${ps.map((p,i) => `<tr>
+              <td>${faNum(i+1)}</td>
+              <td><b>${esc(p.name)}</b>${p.description ? `<br><small>${esc(p.description)}</small>` : ''}</td>
+              <td>${esc(p.manager || '—')}</td>
+              <td>${esc(p.staff.join('، ') || '—')}</td>
+              <td>${faNum(p.status)}٪</td>
+              <td>${esc(p.address || '—')}</td>
+              <td>${esc(p.startDate || '—')} → ${esc(p.endDate || '—')}</td>
+              <td>${moneyFmt(p.totalCost)}</td>
+              <td>${moneyFmt(p.budget)}</td>
+            </tr>${p.extra.filter(e=>e.k).map(e=>`<tr class="extra"><td></td><td colspan="8"><small>${esc(e.k)}: ${esc(e.v)}</small></td></tr>`).join('')}`).join('')}
+          </tbody>
+        </table>
+      </section>`;
+  }).join('');
+
+  return `<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>گزارش</title>
+    <style>
+      body{font-family:Tahoma,sans-serif;padding:24px;color:#1b2430;line-height:1.7;max-width:960px;margin:0 auto}
+      h1{font-size:22px;margin:0 0 4px}
+      h2{font-size:15px;margin:24px 0 8px;border-bottom:2px solid #dfe4ea;padding-bottom:6px}
+      h2 small{font-weight:400;color:#6b7785;font-size:12px;margin-inline-start:8px}
+      .dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-inline-end:8px;vertical-align:middle}
+      .meta{color:#6b7785;font-size:12px;margin-bottom:16px}
+      .metrics{color:#6b7785;font-size:12px;margin:4px 0 8px}
+      .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:16px 0;padding:12px;background:#f3f5f8;border-radius:8px}
+      .kpi{text-align:center}
+      .kpi b{display:block;font-size:16px;color:#2563eb}
+      .kpi span{font-size:11px;color:#6b7785}
+      table{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+      th,td{border:1px solid #dfe4ea;padding:6px 8px;text-align:right;vertical-align:top}
+      th{background:#f3f5f8;font-weight:600;font-size:11.5px}
+      td small{color:#6b7785}
+      tr.extra td{background:#fafbfc;border-top:none}
+      section.co{page-break-inside:avoid;margin-bottom:16px}
+      @media print{body{padding:8px}h1{font-size:18px}section.co{page-break-inside:avoid}.kpis{background:#f3f5f8}}
+    </style></head><body>
+    <h1>${esc(DATA.holding.name || 'هلدینگ')} — گزارش پروژه‌ها</h1>
+    <div class="meta">مدیر هلدینگ: ${esc(DATA.holding.manager || '—')} • تاریخ: ${todayLabel()}</div>
+    <div class="kpis">
+      <div class="kpi"><b>${faNum(DATA.companies.length)}</b><span>شرکت</span></div>
+      <div class="kpi"><b>${faNum(DATA.projects.length)}</b><span>پروژه</span></div>
+      <div class="kpi"><b>${faNum(avg)}٪</b><span>میانگین پیشرفت</span></div>
+      <div class="kpi"><b>${moneyFmt(totalCost)}</b><span>مجموع هزینه</span></div>
+    </div>
+    ${companyBlocks}
+    <div style="margin-top:24px;padding-top:12px;border-top:1px dashed #dfe4ea;font-size:11px;color:#6b7785;text-align:center">
+      مجموع بودجه: ${moneyFmt(totalBudget)} • مجموع هزینه: ${moneyFmt(totalCost)}
+    </div></body></html>`;
+}
+function printReport(){
+  const w = window.open('', '_blank');
+  w.document.write(buildReportHTML());
+  w.document.close();
+  w.focus();
+  setTimeout(() => w.print(), 400);
+}
+function buildCompanyText(c){
+  const ps = DATA.projects.filter(p => p.companyId === c.id);
+  const avg = ps.length ? Math.round(ps.reduce((s,p)=>s+p.status,0)/ps.length) : 0;
+  const totalBudget = ps.reduce((s,p)=>s+num(p.budget),0);
+  const totalCost = ps.reduce((s,p)=>s+num(p.totalCost),0);
+  const line = '─'.repeat(40);
+  let out = `گزارش شرکت ${c.name}\n${line}\n`;
+  out += `مدیر شرکت: ${c.manager || '—'}\n`;
+  out += `تاریخ گزارش: ${todayLabel()}\n`;
+  out += `تعداد پروژه: ${ps.length}\n`;
+  out += `میانگین پیشرفت: ${avg}٪\n`;
+  out += `مجموع بودجه: ${moneyFmt(totalBudget)}\n`;
+  out += `مجموع هزینه: ${moneyFmt(totalCost)}\n\n`;
+  ps.forEach((p, i) => {
+    out += `[${i+1}] ${p.name}\n`;
+    out += `    مدیر پروژه: ${p.manager || '—'}\n`;
+    if (p.staff.length) out += `    مسئولان: ${p.staff.join('، ')}\n`;
+    out += `    پیشرفت: ${p.status}٪\n`;
+    out += `    آدرس: ${p.address || '—'}\n`;
+    if (p.description) out += `    توضیحات: ${p.description}\n`;
+    out += `    بازه: ${p.startDate || '—'} تا ${p.endDate || '—'}\n`;
+    out += `    هزینه / بودجه: ${moneyFmt(p.totalCost)} / ${moneyFmt(p.budget)}\n`;
+    p.extra.forEach(e => { if (e.k) out += `    ${e.k}: ${e.v}\n`; });
+    out += `\n`;
+  });
+  return out;
+}
+function downloadTextReport(){
+  const cid = $('#reportCompany').value;
+  let text, fname;
+  if (cid){
+    const c = DATA.companies.find(x => x.id === cid);
+    if (!c) return;
+    text = buildCompanyText(c);
+    fname = 'report-' + c.name.replace(/[^\w\u0600-\u06FF]+/g,'-') + '.txt';
+  } else {
+    const head = `گزارش کلی ${DATA.holding.name || 'هلدینگ'}\nمدیر هلدینگ: ${DATA.holding.manager || '—'}\nتاریخ: ${todayLabel()}\n\n`;
+    text = head + DATA.companies.map(c => buildCompanyText(c)).join('\n\n' + '═'.repeat(40) + '\n\n');
+    fname = 'report-all.txt';
+  }
+  downloadFile(new Blob(['\uFEFF' + text], {type:'text/plain;charset=utf-8'}), fname);
+  toast('گزارش متنی دانلود شد.', 'ok');
+}
+function downloadCSV(){
+  const cols = ['نام پروژه','شرکت','مدیر','سایر مسئولان','پیشرفت','آدرس','توضیحات','تاریخ شروع','تاریخ پایان','هزینه کل','بودجه'];
+  const esc2 = v => `"${String(v ?? '').replace(/"/g,'""')}"`;
+  const rows = [cols.map(esc2).join(',')];
+  DATA.projects.forEach(p => {
+    const co = DATA.companies.find(c => c.id === p.companyId);
+    rows.push([
+      p.name, co?.name || '', p.manager, p.staff.join('، '), p.status+'٪',
+      p.address, p.description, p.startDate, p.endDate, p.totalCost, p.budget
+    ].map(esc2).join(','));
+  });
+  const csv = '\uFEFF' + rows.join('\r\n');
+  downloadFile(new Blob([csv], {type:'text/csv;charset=utf-8'}), 'projects.csv');
+  toast('CSV دانلود شد.', 'ok');
+}
+
+/* ============================================================
+   A-2: PNG export (Instagram / LinkedIn)
+   ============================================================ */
+async function exportSocialImage(W, H){
+  await document.fonts.ready;
+  if (!DATA.settings.mapImage){ toast('ابتدا نقشه را بارگذاری کنید.', 'warn'); return; }
+  if (!DATA.projects.length){ toast('هیچ پروژه‌ای برای خروجی نیست.', 'warn'); return; }
+
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  const accent = (DATA.companies[0] && DATA.companies[0].color) || '#2d6a4f';
+  const ink = '#1b2430', muted = '#6b7785', bg = '#ffffff';
+  const pad = Math.round(W * 0.045);
+  const headerH = Math.round(H * (W > H ? 0.15 : 0.17));
+  const footerH = Math.round(H * (W > H ? 0.18 : 0.13));
+  const mapY = headerH;
+  const mapH = H - headerH - footerH;
+
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+  ctx.direction = 'rtl';
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+
+  // header
+  const titleSize = Math.round(headerH * 0.36);
+  const subSize = Math.round(headerH * 0.16);
+  const titleTop = pad * 0.7;
+  const barW = Math.round(titleSize * 0.35);
+  const barH = Math.round(titleSize * 0.85);
+  ctx.fillStyle = accent;
+  ctx.fillRect(W - pad + barW + 8, titleTop + 4, barW, barH);
+  ctx.fillStyle = ink;
+  ctx.font = '700 ' + titleSize + 'px Vazirmatn, Tahoma, sans-serif';
+  ctx.fillText(DATA.holding.name || 'نقشه پروژه‌ها', W - pad, titleTop + barH * 0.5);
+  const today = new Date().toLocaleDateString('fa-IR', {year:'numeric', month:'2-digit', day:'2-digit'});
+  ctx.fillStyle = muted;
+  ctx.font = '400 ' + subSize + 'px Vazirmatn, Tahoma, sans-serif';
+  ctx.fillText('گزارش ' + today, W - pad, titleTop + barH + subSize * 1.3);
+
+  // map
+  const mapImg = await new Promise((res, rej) => {
+    const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = DATA.settings.mapImage;
+  });
+  const mapAspect = mapImg.width / mapImg.height;
+  const areaW = W - pad * 2;
+  const areaH = mapH - pad * 0.4;
+  let dW, dH;
+  if (mapAspect > areaW / areaH){ dW = areaW; dH = areaW / mapAspect; }
+  else { dH = areaH; dW = areaH * mapAspect; }
+  const dX = (W - dW) / 2;
+  const dY = mapY + (areaH - dH) / 2;
+
+  ctx.save();
+  roundRect(ctx, dX, dY, dW, dH, 12); ctx.clip();
+  ctx.fillStyle = '#f8fafc'; ctx.fillRect(dX, dY, dW, dH);
+  ctx.drawImage(mapImg, dX, dY, dW, dH);
+  ctx.restore();
+
+  // edges
+  const ps = DATA.projects;
+  ctx.strokeStyle = accent;
+  ctx.lineWidth = Math.max(1.5, W * 0.0018);
+  ctx.globalAlpha = 0.45;
+  ctx.beginPath();
+  for (let i = 0; i < ps.length; i++)
+    for (let j = i+1; j < ps.length; j++){
+      ctx.moveTo(dX + ps[i].x * dW, dY + ps[i].y * dH);
+      ctx.lineTo(dX + ps[j].x * dW, dY + ps[j].y * dH);
+    }
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  // pins
+  const pinR = Math.max(5, W * 0.006);
+  ps.forEach(p => {
+    const cx = dX + p.x * dW, cy = dY + p.y * dH;
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(cx, cy, pinR + 2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = accent;
+    ctx.beginPath(); ctx.arc(cx, cy, pinR, 0, Math.PI * 2); ctx.fill();
+  });
+
+  // footer KPIs
+  const total = ps.length;
+  const planted = ps.reduce((s, p) => s + (p.saplingsPlanted || 0), 0);
+  const maintained = ps.reduce((s, p) => s + (p.saplingsMaintained || 0), 0);
+  const area = ps.reduce((s, p) => s + (p.areaM2 || 0), 0);
+  const kpis = [
+    { v: faNum(total), l: 'پروژه' },
+    { v: faNum(planted), l: 'نهال کاشته‌شده' },
+    { v: faNum(maintained), l: 'نهال نگهداری‌شده' },
+    { v: formatArea(area), l: 'مساحت کل' },
+  ];
+  const gap = pad * 0.45;
+  const kpiW = (W - pad * 2 - gap * (kpis.length - 1)) / kpis.length;
+  const kpiH = footerH - pad * 0.55;
+  const kpiY = H - footerH + pad * 0.35;
+  kpis.forEach((kpi, idx) => {
+    const x = W - pad - (idx + 1) * kpiW - idx * gap;
+    ctx.fillStyle = '#f8fafc';
+    roundRect(ctx, x, kpiY, kpiW, kpiH, 10); ctx.fill();
+    ctx.strokeStyle = '#e5e9ee'; ctx.lineWidth = 1;
+    roundRect(ctx, x, kpiY, kpiW, kpiH, 10); ctx.stroke();
+    ctx.textAlign = 'center';
+    ctx.fillStyle = accent;
+    ctx.font = '700 ' + Math.round(kpiH * 0.30) + 'px Vazirmatn, Tahoma, sans-serif';
+    ctx.fillText(kpi.v, x + kpiW / 2, kpiY + kpiH * 0.36);
+    ctx.fillStyle = muted;
+    ctx.font = '400 ' + Math.round(kpiH * 0.15) + 'px Vazirmatn, Tahoma, sans-serif';
+    ctx.fillText(kpi.l, x + kpiW / 2, kpiY + kpiH * 0.72);
+  });
+
+  canvas.toBlob(blob => {
+    downloadFile(blob, 'holding-map-' + W + 'x' + H + '.png');
+    toast('تصویر ذخیره شد ✓', 'ok');
+  }, 'image/png');
+}
+
+function roundRect(ctx, x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+/* ============================================================
+   Photos
+   ============================================================ */
+function renderPhotos(p){
+  const grid = $('#photoGrid');
+  const count = $('#photoCount');
+  if (!grid) return;
+  grid.innerHTML = '';
+  count.textContent = '(' + faNum(p.photos.length) + ' از ۴)';
+  p.photos.forEach((src, i) => {
+    const item = document.createElement('div'); item.className = 'photo-item';
+    const img = document.createElement('img'); img.src = src; img.alt = 'عکس ' + faNum(i+1);
+    img.addEventListener('click', () => { $('#lightboxImg').src = src; $('#lightbox').hidden = false; });
+    const del = document.createElement('button'); del.className = 'photo-del'; del.textContent = '×';
+    del.addEventListener('click', ev => { ev.stopPropagation(); p.photos.splice(i,1); markDirty(); renderPhotos(p); });
+    item.append(img, del);
+    grid.append(item);
+  });
+  const btn = $('#btnAddPhoto');
+  if (btn) btn.disabled = p.photos.length >= 4;
+}
+
+/* ============================================================
+   Toast
+   ============================================================ */
+function toast(msg, type){
+  const el = document.createElement('div');
+  el.className = 'toast' + (type?' '+type:'');
+  el.textContent = msg;
+  $('#toasts').append(el);
+  setTimeout(() => el.remove(), 2600);
+}
+
+/* ============================================================
+   رویدادها
+   ============================================================ */
+function bindEvents(){
+  $('#btnOpen').addEventListener('click', openData);
+  $('#btnSave').addEventListener('click', saveData);
+  $('#btnExport').addEventListener('click', () => {
+    downloadFile(new Blob([JSON.stringify(DATA,null,2)], {type:'application/json;charset=utf-8'}), 'data.json');
+    setClean(); toast('data.json دانلود شد.', 'ok');
+  });
+  $('#btnMap').addEventListener('click', () => $('#fileMap').click());
+  $('#btnMapClear').addEventListener('click', () => {
+    if (!DATA.settings.mapImage) return;
+    if (!confirm('نقشه حذف شود؟ (نقاط حفظ می‌شوند)')) return;
+    DATA.settings.mapImage = null; DATA.settings.mapName = null;
+    markDirty(); renderMap();
+  });
+  $('#btnAdd').addEventListener('click', () => toggleAddMode());
+  $('#btnPrint').addEventListener('click', printReport);
+  $('#btnTxt').addEventListener('click', downloadTextReport);
+  $('#btnCsv').addEventListener('click', downloadCSV);
+  $('#btnIg').addEventListener('click', () => exportSocialImage(1080, 1080));
+  $('#btnLi').addEventListener('click', () => exportSocialImage(1200, 627));
+  $('#btnUnlock').addEventListener('click', () => {
+    if (editUnlocked){
+      if (!confirm('خروج از حالت ویرایش؟')) return;
+      editUnlocked = false;
+      toast('به حالت فقط خواندنی بازگشت.', 'ok');
+    } else {
+      const pw = prompt('رمز ویرایش را وارد کنید:');
+      if (pw === null) return;
+      if (pw !== DATA.settings.editPassword){ toast('رمز نادرست است.', 'warn'); return; }
+      editUnlocked = true;
+      toast('حالت ویرایش فعال شد.', 'ok');
+    }
+    render();
+    const p = selectedProjectId && DATA.projects.find(x => x.id === selectedProjectId);
+    if (p) populateProjectForm(p);
+  });
+
+  $('#fileData').addEventListener('change', async e => {
+    const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+    fileHandle = null; await applyImport(await f.text());
+  });
+  $('#fileMap').addEventListener('change', e => {
+    const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+    if (f.size > 4*1024*1024 && !confirm('حجم تصویر بیشتر از ۴ مگابایت است. ادامه؟')) return;
+    const r = new FileReader();
+    r.onload = () => {
+      DATA.settings.mapImage = r.result;
+      DATA.settings.mapName = f.name;
+      markDirty(); renderMap();
+      toast('نقشه بارگذاری شد.', 'ok');
+    };
+    r.readAsDataURL(f);
+  });
+  $('#holdName').addEventListener('input', e => { DATA.holding.name = e.target.value; markDirty(); });
+  $('#holdManager').addEventListener('input', e => { DATA.holding.manager = e.target.value; markDirty(); });
+  $('#currency').addEventListener('change', e => { DATA.settings.currency = e.target.value; markDirty(); renderSummary(); });
+  $('#addCompany').addEventListener('click', () => {
+    const i = DATA.companies.length;
+    DATA.companies.push({ id: uid('c'), name: 'شرکت '+faNum(i+1), manager: '', color: PALETTE[i%PALETTE.length] });
+    markDirty(); render();
+  });
+
+  mapbox().addEventListener('click', e => {
+    if (!canEdit()) { if (selectedProjectId) showOverview(); return; }
+    if (e.target.closest('.pin-wrap')) return;
+    if (addMode){
+      const r = mapbox().getBoundingClientRect();
+      createProject(clamp((e.clientX-r.left)/r.width,0,1), clamp((e.clientY-r.top)/r.height,0,1));
+      return;
+    }
+    if (selectedProjectId) showOverview();
+  });
+
+  $('#btnBack').addEventListener('click', showOverview);
+  $('#btnDeleteProject').addEventListener('click', () => {
+    const p = DATA.projects.find(x => x.id === selectedProjectId); if (!p) return;
+    if (confirm(`پروژه «${p.name}» حذف شود؟`)) deleteProject(p.id);
+  });
+  const scEl = $('#showcaseColor');
+  if (scEl) scEl.addEventListener('input', e => {
+    if (!DATA.companies[0]) return;
+    DATA.companies[0].color = e.target.value;
+    markDirty(); renderPins(); renderEdges();
+  });
+  $('#btnAddExtra').addEventListener('click', () => {
+    const p = DATA.projects.find(x => x.id === selectedProjectId); if (!p) return;
+    p.extra.push({k:'', v:''}); markDirty(); renderExtra(p);
+  });
+
+  const getP = () => DATA.projects.find(x => x.id === selectedProjectId);
+  const updatePinTip = p => {
+    const wrap = mapbox().querySelector(`.pin-wrap[data-pid="${p.id}"]`);
+    if (!wrap) return;
+    const co = DATA.companies.find(c => c.id === p.companyId);
+    wrap.dataset.tip = p.name + (co?' — '+co.name:'') + ' — ' + faNum(p.status) + '٪';
+    if (co) wrap.style.setProperty('--c', co.color);
+  };
+
+  $('#pName').addEventListener('input', e => { const p=getP(); if(p){ p.name=e.target.value; markDirty(); updatePinTip(p); } });
+  $('#pCompany').addEventListener('change', e => {
+    const p=getP(); if(!p) return;
+    p.companyId = e.target.value; markDirty();
+    renderPins(); renderEdges(); renderCompanies(); updatePinTip(p);
+  });
+  $('#pManager').addEventListener('input', e => { const p=getP(); if(p){ p.manager=e.target.value; markDirty(); } });
+  $('#pStaff').addEventListener('input', e => {
+    const p=getP(); if(!p) return;
+    p.staff = e.target.value.split(/[,،]/).map(s=>s.trim()).filter(Boolean);
+    markDirty();
+  });
+  $('#pStatus').addEventListener('input', e => {
+    const p=getP(); if(!p) return;
+    p.status = +e.target.value;
+    $('#pStatusVal').textContent = faNum(p.status)+'٪';
+    markDirty(); updatePinTip(p); renderSummary();
+  });
+  $('#pDesc').addEventListener('input', e => { const p=getP(); if(p){ p.description=e.target.value; markDirty(); } });
+  $('#pAddress').addEventListener('input', e => { const p=getP(); if(p){ p.address=e.target.value; markDirty(); } });
+  $('#pStart').addEventListener('input', e => { const p=getP(); if(p){ p.startDate=e.target.value; markDirty(); } });
+  $('#pEnd').addEventListener('input', e => { const p=getP(); if(p){ p.endDate=e.target.value; markDirty(); } });
+  $('#pCost').addEventListener('input', e => { const p=getP(); if(p){ p.totalCost=num(e.target.value); markDirty(); renderSummary(); } });
+  $('#pBudget').addEventListener('input', e => { const p=getP(); if(p){ p.budget=num(e.target.value); markDirty(); renderSummary(); } });
+  $('#pSaplingsPlanted').addEventListener('input', e => { const p=getP(); if(p){ p.saplingsPlanted=num(e.target.value); markDirty(); renderSummary(); } });
+  $('#pSaplingsMaintained').addEventListener('input', e => { const p=getP(); if(p){ p.saplingsMaintained=num(e.target.value); markDirty(); renderSummary(); } });
+  $('#pAreaM2').addEventListener('input', e => { const p=getP(); if(!p) return; p.areaM2=num(e.target.value); $('#pAreaFormatted').textContent = p.areaM2 ? '≈ ' + formatArea(p.areaM2) : ''; markDirty(); renderSummary(); });
+  $('#btnAddPhoto').addEventListener('click', () => { const p=getP(); if(!p) return; if(p.photos.length >= 4){ toast('حداکثر ۴ عکس.', 'warn'); return; } $('#photoInput').click(); });
+  $('#photoInput').addEventListener('change', e => { const p=getP(); if(!p) return; const files=Array.from(e.target.files||[]); e.target.value=''; const room=4-p.photos.length; files.slice(0,room).forEach(f => { const r=new FileReader(); r.onload=()=>{ p.photos.push(r.result); markDirty(); renderPhotos(p); }; r.readAsDataURL(f); }); });
+  $('#lightbox').addEventListener('click', () => { $('#lightbox').hidden = true; $('#lightboxImg').src = ''; });
+
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='s'){ e.preventDefault(); if (canEdit()) saveData(); }
+    if (e.key==='Escape'){
+      if (addMode) toggleAddMode(false);
+      else if (selectedProjectId) showOverview();
+    }
+  });
+  window.addEventListener('beforeunload', e => {
+    if (!dirty || !canEdit()) return; e.preventDefault(); e.returnValue='';
+  });
+}
+
+bindEvents();
+resetUnlock();
+render();
+
+// Auto-load data.json if served from a web server (GitHub Pages)
+if (window.location.protocol.startsWith('http')) {
+  fetch('data.json', { cache: 'no-store' })
+    .then(r => r.ok ? r.text() : null)
+    .then(t => { if (t) applyImport(t); })
+    .catch(() => {});
+}
+
+// Auto-load data.json if served from a web server (GitHub Pages)
+if (window.location.protocol.startsWith('http')) {
+  fetch('data.json', { cache: 'no-store' })
+    .then(r => r.ok ? r.text() : null)
+    .then(t => { if (t) applyImport(t); })
+    .catch(() => {});
+}
+</script>
+</body>
+</html>
