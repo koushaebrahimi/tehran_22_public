@@ -79,10 +79,9 @@ table.sum.co-table td:first-child{text-align:start;font-weight:400}
 
 /* edges — نسخهٔ درشت‌تر */
 .edges-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible}
-.edge{stroke-width:2.5;opacity:.55;stroke-dasharray:4 6;animation:edge-flow 2s linear infinite;fill:none}
-.edge.dim{opacity:.12;animation-play-state:paused}
-.edge.hot{stroke-width:4.5;opacity:1;stroke-dasharray:none;animation:none}
-@keyframes edge-flow{to{stroke-dashoffset:-20}}
+.edge{stroke-width:2.5;opacity:.55;fill:none}
+.edge.dim{opacity:.12}
+.edge.hot{stroke-width:4.5;opacity:1}
 
 /* pins */
 .pin-wrap{position:absolute;transform:translate(-50%,-50%);z-index:2;cursor:grab}
@@ -132,6 +131,7 @@ body.hide-showcase .showcase-only{display:none !important}
   <div class="brand">
     <span class="dot-dirty" id="dirtyDot"></span>
     نقشهٔ پروژه‌های هلدینگ
+    <span id="mainTitle">نقشهٔ پروژه‌های هلدینگ</span>
     <small id="modeBadge">—</small>
   </div>
   <button class="btn" id="btnOpen">بارگذاری داده</button>
@@ -145,7 +145,7 @@ body.hide-showcase .showcase-only{display:none !important}
   <select id="addCompanySelect" hidden></select>
   <span class="sep"></span>
   <button class="btn" id="btnPrint" title="چاپ / PDF">چاپ گزارش</button>
-  <select id="reportCompany" title="انتخاب شرکت برای گزارش متنی"></select>
+  <select id="reportCompany" class="internal-only" title="انتخاب شرکت برای گزارش متنی"></select>
   <button class="btn" id="btnTxt">گزارش متنی</button>
   <button class="btn" id="btnCsv">خروجی CSV</button>
   <button class="btn ghost" id="btnUnlock" style="display:none">🔒 حالت ویرایش</button>
@@ -158,7 +158,7 @@ body.hide-showcase .showcase-only{display:none !important}
 <main>
   <aside>
     <div id="viewOverview">
-      <div class="sec">
+      <div class="sec internal-only">
         <h3>هلدینگ</h3>
         <div class="field"><label for="holdName">نام هلدینگ</label><input id="holdName" type="text" placeholder="نام هلدینگ"></div>
         <div class="field"><label for="holdManager">مدیر هلدینگ</label><input id="holdManager" type="text" placeholder="نام و نام خانوادگی"></div>
@@ -191,7 +191,7 @@ body.hide-showcase .showcase-only{display:none !important}
       <div class="field"><label for="pName">نام پروژه</label><input id="pName" type="text"></div>
       <div class="field internal-only"><label for="pCompany">شرکت</label><select id="pCompany"></select></div>
       <div class="field"><label for="pManager">مدیر پروژه</label><input id="pManager" type="text" placeholder="نام و نام خانوادگی"></div>
-      <div class="field"><label for="pStaff">سایر مسئولان (با ویرگول)</label><input id="pStaff" type="text" placeholder="نام ۱، نام ۲"></div>
+      <div class="field internal-only"><label for="pStaff">سایر مسئولان (با ویرگول)</label><input id="pStaff" type="text" placeholder="نام ۱، نام ۲"></div>
       <div class="field"><label for="pStatus">وضعیت پیشرفت: <b id="pStatusVal">۰٪</b></label><input id="pStatus" type="range" min="0" max="100" step="1"></div>
       <div class="field"><label for="pDesc">توضیحات</label><textarea id="pDesc" rows="2"></textarea></div>
       <div class="field"><label for="pAddress">آدرس</label><input id="pAddress" type="text"></div>
@@ -202,8 +202,8 @@ body.hide-showcase .showcase-only{display:none !important}
         <div class="field internal-only"><label for="pBudget">بودجه</label><input id="pBudget" type="number" min="0" step="1000"></div>
       </div>
       <div class="showcase-only">
-        <div class="field"><label for="pSaplingsPlanted">نهال کاشته‌شده</label><input id="pSaplingsPlanted" type="number" min="0" step="1"></div>
-        <div class="field"><label for="pSaplingsMaintained">نهال نگهداری‌شده</label><input id="pSaplingsMaintained" type="number" min="0" step="1"></div>
+        <div class="field"><label for="pSaplingsPlanted">نهال کاشته‌شده (اصله)</label><input id="pSaplingsPlanted" type="number" min="0" step="1"></div>
+        <div class="field"><label for="pSaplingsMaintained">نهال نگهداری‌شده (اصله)</label><input id="pSaplingsMaintained" type="number" min="0" step="1"></div>
         <div class="field"><label for="pAreaM2">مساحت (متر مربع)</label><input id="pAreaM2" type="number" min="0" step="1"><small id="pAreaFormatted" style="font-size:11.5px;color:var(--muted)"></small></div>
         <div class="field"><label>تصاویر <span id="photoCount" style="color:var(--muted);font-weight:400"></span></label><div id="photoGrid" class="photo-grid"></div><input type="file" id="photoInput" accept="image/*" multiple hidden><button class="btn" id="btnAddPhoto" type="button" style="width:100%">+ افزودن عکس</button></div>
       </div>
@@ -242,11 +242,7 @@ function stableDelay(id){
 function isShowcase(){ return DATA.settings.mode === 'showcase'; }
 function formatArea(m2){
   const n = Number(m2) || 0;
-  if (n >= 10000){
-    const ha = n / 10000;
-    return faNum(Math.round(ha * 100) / 100) + ' هکتار';
-  }
-  return faNum(Math.round(n)) + ' متر مربع';
+  return faNum(Math.round((n / 10000) * 100) / 100) + ' هکتار';
 }
 function todayLabel(){
   try { return new Date().toLocaleDateString('fa-IR', {year:'numeric', month:'2-digit', day:'2-digit'}); }
@@ -346,6 +342,8 @@ function render(){
 }
 function renderHolding(){
   $('#holdName').value = DATA.holding.name || '';
+  const mt = document.getElementById('mainTitle');
+  if (mt) mt.textContent = DATA.holding.name || 'نقشه پروژه‌ها';
   $('#holdManager').value = DATA.holding.manager || '';
   $('#currency').value = DATA.settings.currency || 'toman';
   const locked = !canEdit();
@@ -408,8 +406,8 @@ function renderSummary(){
     rows = [
       ['تعداد پروژه‌ها', faNum(list.length)],
       ['میانگین پیشرفت', faNum(avg)+'٪'],
-      ['مجموع نهال کاشته‌شده', faNum(sum('saplingsPlanted'))],
-      ['مجموع نهال نگهداری‌شده', faNum(sum('saplingsMaintained'))],
+      ['مجموع نهال کاشته‌شده (اصله)', faNum(sum('saplingsPlanted'))],
+      ['مجموع نهال نگهداری‌شده (اصله)', faNum(sum('saplingsMaintained'))],
       ['مجموع مساحت', formatArea(sum('areaM2'))]
     ];
   } else {
@@ -478,7 +476,7 @@ function renderPins(){
     wrap.style.setProperty('--c', color);
     let tip = p.name;
     if (isShowcase()){
-      if (p.saplingsPlanted) tip += ' — ' + faNum(p.saplingsPlanted) + ' نهال';
+      if (p.saplingsPlanted) tip += ' — ' + faNum(p.saplingsPlanted) + ' اصله نهال';
       if (p.areaM2) tip += ' — ' + formatArea(p.areaM2);
       tip += ' — ' + faNum(p.status) + '٪';
     } else {
@@ -505,7 +503,9 @@ function renderEdges(){
         const involvesSel = selectedProjectId && (p1.id === selectedProjectId || p2.id === selectedProjectId);
         const anySel = selectedProjectId !== null;
         const cls = involvesSel ? 'edge hot' : (anySel ? 'edge dim' : 'edge');
-        lines.push(`<line class="${cls}" x1="${p1.x*1000}" y1="${p1.y*1000}" x2="${p2.x*1000}" y2="${p2.y*1000}" stroke="${esc(color)}" vector-effect="non-scaling-stroke"/>`);
+        const cx = (p1.x + p2.x) * 500 - (p2.y - p1.y) * 200;
+        const cy = (p1.y + p2.y) * 500 + (p2.x - p1.x) * 200;
+        lines.push(`<path class="${cls}" d="M ${p1.x*1000} ${p1.y*1000} Q ${cx} ${cy} ${p2.x*1000} ${p2.y*1000}" stroke="${esc(color)}" fill="none" vector-effect="non-scaling-stroke"/>`);
       }
   } else {
     DATA.companies.forEach(co => {
@@ -517,7 +517,9 @@ function renderEdges(){
           const involvesSel = selectedProjectId && (p1.id === selectedProjectId || p2.id === selectedProjectId);
           const anySel = selectedProjectId !== null;
           const cls = involvesSel ? 'edge hot' : (anySel ? 'edge dim' : 'edge');
-          lines.push(`<line class="${cls}" x1="${p1.x*1000}" y1="${p1.y*1000}" x2="${p2.x*1000}" y2="${p2.y*1000}" stroke="${esc(co.color)}" vector-effect="non-scaling-stroke"/>`);
+          const cx = (p1.x + p2.x) * 500 - (p2.y - p1.y) * 200;
+          const cy = (p1.y + p2.y) * 500 + (p2.x - p1.x) * 200;
+          lines.push(`<path class="${cls}" d="M ${p1.x*1000} ${p1.y*1000} Q ${cx} ${cy} ${p2.x*1000} ${p2.y*1000}" stroke="${esc(co.color)}" fill="none" vector-effect="non-scaling-stroke"/>`);
         }
     });
   }
